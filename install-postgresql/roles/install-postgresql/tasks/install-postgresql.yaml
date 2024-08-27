@@ -17,7 +17,7 @@
 - name: Initialize PostgreSQL database
   ansible.builtin.command:
     cmd: "/usr/pgsql-{{ postgresql_version }}/bin/postgresql-{{ postgresql_version }}-setup initdb"
-  creates: /var/lib/pgsql/{{ postgresql_version }}/data/PG_VERSION
+    creates: /var/lib/pgsql/{{ postgresql_version }}/data/PG_VERSION
 
 - name: Enable and start PostgreSQL service
   ansible.builtin.systemd:
