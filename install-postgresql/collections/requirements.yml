@@ -1,3 +1,2 @@
 collections:
-  - source: /root/.ansible/collections/
-    type: dir
+  - community.postgresql
