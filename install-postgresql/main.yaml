@@ -1,9 +1,6 @@
 - hosts: 192.168.1.236
   gather_facts: False
   remote_user: root
-  collections:
-    - source: /root/.ansible/collections/
-      type: dir
   vars_files:
     - vars_files/vars.yaml
   roles:
