@@ -2,7 +2,7 @@
   gather_facts: False
   remote_user: root
   collections:
-    - name: community.postgresql
+    - community.postgresql
   vars_files:
     - vars_files/vars.yaml
   roles:
