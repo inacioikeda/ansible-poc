@@ -1,0 +1,4 @@
+username: "newuser"
+password: "password123"
+groups: "wheel"  # Altere para os grupos desejados, separados por vírgula
+shell: "/bin/bash"

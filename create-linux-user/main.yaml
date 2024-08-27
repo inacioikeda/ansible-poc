@@ -1,0 +1,7 @@
+- hosts: 172.16.10.100
+  gather_facts: False
+  remote_user: root
+  vars_files:
+    - vars_files/vars.yaml
+  roles:
+    - { role: create-linux-user }

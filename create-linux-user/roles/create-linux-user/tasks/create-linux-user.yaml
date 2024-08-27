@@ -1,0 +1,16 @@
+---
+- name: Create a user
+  ansible.builtin.user:
+    name: "{{ username }}"
+    password: "{{ password | password_hash('sha512') }}"
+    shell: "{{ shell }}"
+    groups: "{{ groups }}"
+    state: present
+
+- name: Ensure the user has a home directory
+  ansible.builtin.file:
+    path: "/home/{{ username }}"
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ groups.split(',')[0] }}"
+    mode: '0755'

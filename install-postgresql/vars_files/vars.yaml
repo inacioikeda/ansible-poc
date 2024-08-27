@@ -1,0 +1,4 @@
+postgresql_version: "15"  # Altere para a versão desejada do PostgreSQL
+db_name: "fabricads"
+db_user: "fabricads"
+db_password: "Fds@2024"

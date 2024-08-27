@@ -1,0 +1,54 @@
+---    
+- name: Install Apache HTTP Server
+  ansible.builtin.yum:
+    name: httpd
+    state: present
+
+- name: Ensure Apache service is enabled and started
+  ansible.builtin.systemd:
+    name: httpd
+    state: started
+    enabled: yes
+
+- name: Configure Apache to listen on a specific port
+  ansible.builtin.lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    regexp: '^Listen '
+    line: "Listen {{ apache_port }}"
+    create: yes
+
+- name: Set ServerAdmin in Apache configuration
+  ansible.builtin.lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    regexp: '^ServerAdmin '
+    line: "ServerAdmin {{ server_admin }}"
+
+- name: Set ServerName in Apache configuration
+  ansible.builtin.lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    regexp: '^ServerName '
+    line: "ServerName {{ server_name }}"
+
+- name: Ensure the firewall allows HTTP traffic
+  ansible.builtin.firewalld:
+    service: http
+    permanent: yes
+    state: enabled
+
+- name: Reload firewalld to apply changes
+  ansible.builtin.command:
+    cmd: firewall-cmd --reload
+
+- name: Create a default index.html page
+  ansible.builtin.copy:
+    dest: /var/www/html/index.html
+    content: |
+      <html>
+      <head><title>Welcome to Your Server!</title></head>
+      <body>
+        <h1>Success! The Apache HTTP server is working!</h1>
+      </body>
+      </html>
+    owner: apache
+    group: apache
+    mode: '0644'

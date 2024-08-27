@@ -1,0 +1,55 @@
+- name: Install PostgreSQL repository
+  ansible.builtin.yum:
+    name: https://download.postgresql.org/pub/repos/yum/repopackages/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+    state: present
+
+- name: Disable the default PostgreSQL module
+  ansible.builtin.yum:
+    name: postgresql
+    state: absent
+
+- name: Install PostgreSQL
+  ansible.builtin.yum:
+    name: postgresql{{ postgresql_version }}-server
+    state: present
+
+- name: Initialize PostgreSQL database
+  ansible.builtin.command:
+    cmd: /usr/pgsql-{{ postgresql_version }}/bin/postgresql-{{ postgresql_version }}-setup initdb
+  creates: /var/lib/pgsql/{{ postgresql_version }}/data/PG_VERSION
+
+- name: Enable and start PostgreSQL service
+  ansible.builtin.systemd:
+    name: postgresql-{{ postgresql_version }}
+    state: started
+    enabled: yes
+
+- name: Ensure PostgreSQL is listening on all interfaces
+  ansible.builtin.lineinfile:
+    path: /var/lib/pgsql/{{ postgresql_version }}/data/postgresql.conf
+    regexp: '^#listen_addresses'
+    line: 'listen_addresses = '\''*'\'''
+
+- name: Configure pg_hba.conf to allow connections
+  ansible.builtin.lineinfile:
+    path: /var/lib/pgsql/{{ postgresql_version }}/data/pg_hba.conf
+    line: "host    all             all             0.0.0.0/0               md5"
+    create: yes
+
+- name: Reload PostgreSQL configuration
+  ansible.builtin.systemd:
+    name: postgresql-{{ postgresql_version }}
+    state: reloaded
+
+- name: Create database
+  community.postgresql.postgresql_db:
+    name: "{{ db_name }}"
+    state: present
+
+- name: Create database user
+  community.postgresql.postgresql_user:
+    name: "{{ db_user }}"
+    password: "{{ db_password }}"
+    priv: "ALL"
+    db: "{{ db_name }}"
+    state: present
