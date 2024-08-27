@@ -4,7 +4,7 @@
     name: "{{ username }}"
     password: "{{ password | password_hash('sha512') }}"
     shell: "{{ shell }}"
-    groups: "{{ groups }}"
+    groups: "{{ grupo }}"
     state: present
 
 - name: Ensure the user has a home directory
@@ -12,5 +12,5 @@
     path: "/home/{{ username }}"
     state: directory
     owner: "{{ username }}"
-    group: "{{ groups.split(',')[0] }}"
+    group: "{{ grupo.split(',')[0] }}"
     mode: '0755'
