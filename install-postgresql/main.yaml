@@ -2,7 +2,8 @@
   gather_facts: False
   remote_user: root
   collections:
-    - community.postgresql
+    - source: /root/.ansible/collections/
+      type: dir
   vars_files:
     - vars_files/vars.yaml
   roles:
