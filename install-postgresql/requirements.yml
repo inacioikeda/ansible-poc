@@ -1,0 +1,3 @@
+collections:
+  - source: /root/.ansible/collections/
+    type: dir
