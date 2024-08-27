@@ -1,3 +1,4 @@
+---
 - name: Install PostgreSQL repository
   ansible.builtin.yum:
     name: https://download.postgresql.org/pub/repos/yum/repopackages/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm
@@ -15,7 +16,7 @@
 
 - name: Initialize PostgreSQL database
   ansible.builtin.command:
-    cmd: /usr/pgsql-{{ postgresql_version }}/bin/postgresql-{{ postgresql_version }}-setup initdb
+    cmd: "/usr/pgsql-{{ postgresql_version }}/bin/postgresql-{{ postgresql_version }}-setup initdb"
   creates: /var/lib/pgsql/{{ postgresql_version }}/data/PG_VERSION
 
 - name: Enable and start PostgreSQL service
