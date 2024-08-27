@@ -28,7 +28,7 @@
   ansible.builtin.lineinfile:
     path: /var/lib/pgsql/{{ postgresql_version }}/data/postgresql.conf
     regexp: '^#listen_addresses'
-    line: 'listen_addresses = '\''*'\'''
+    line: 'listen_addresses = ''*''
 
 - name: Configure pg_hba.conf to allow connections
   ansible.builtin.lineinfile:
