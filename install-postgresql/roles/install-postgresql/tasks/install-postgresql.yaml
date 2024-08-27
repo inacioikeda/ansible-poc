@@ -43,12 +43,12 @@
     state: reloaded
 
 - name: Create database
-  community.postgresql.postgresql_db:
+  ansible.community.postgresql.postgresql_db:
     name: "{{ db_name }}"
     state: present
 
 - name: Create database user
-  community.postgresql.postgresql_user:
+  ansible.community.postgresql.postgresql_user:
     name: "{{ db_user }}"
     password: "{{ db_password }}"
     priv: "ALL"
