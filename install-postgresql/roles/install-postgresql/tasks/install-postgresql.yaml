@@ -9,15 +9,15 @@
     name: postgresql
     state: absent
 
-- name: Install PostgreSQL
+- name: Install PostgreSQL server
   ansible.builtin.yum:
     name: postgresql{{ postgresql_version }}-server
     state: present
 
 - name: Initialize PostgreSQL database
   ansible.builtin.command:
-    cmd: "/usr/pgsql-{{ postgresql_version }}/bin/postgresql-{{ postgresql_version }}-setup initdb"
-    creates: /var/lib/pgsql/{{ postgresql_version }}/data/PG_VERSION
+    cmd: /usr/pgsql-{{ postgresql_version }}/bin/postgresql-{{ postgresql_version }}-setup initdb
+  creates: /var/lib/pgsql/{{ postgresql_version }}/data/PG_VERSION
 
 - name: Enable and start PostgreSQL service
   ansible.builtin.systemd:
@@ -25,7 +25,7 @@
     state: started
     enabled: yes
 
-- name: Ensure PostgreSQL is listening on all interfaces
+- name: Configure PostgreSQL to listen on all interfaces
   ansible.builtin.lineinfile:
     path: /var/lib/pgsql/{{ postgresql_version }}/data/postgresql.conf
     regexp: '^#listen_addresses'
@@ -42,15 +42,17 @@
     name: postgresql-{{ postgresql_version }}
     state: reloaded
 
-- name: Create database
-  community.general.postgresql_db:
-    name: "{{ db_name }}"
-    state: present
+- name: Create PostgreSQL database
+  ansible.builtin.shell: |
+    /usr/pgsql-{{ postgresql_version }}/bin/psql -U postgres -c "CREATE DATABASE {{ db_name }};"
+  become_user: postgres
 
-- name: Create database user
-  community.general.postgresql_user:
-    name: "{{ db_user }}"
-    password: "{{ db_password }}"
-    priv: "ALL"
-    db: "{{ db_name }}"
-    state: present
+- name: Create PostgreSQL user
+  ansible.builtin.shell: |
+    /usr/pgsql-{{ postgresql_version }}/bin/psql -U postgres -c "CREATE USER {{ db_user }} WITH PASSWORD '{{ db_password }}';"
+  become_user: postgres
+
+- name: Grant privileges to PostgreSQL user on the database
+  ansible.builtin.shell: |
+    /usr/pgsql-{{ postgresql_version }}/bin/psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE {{ db_name }} TO {{ db_user }};"
+  become_user: postgres
