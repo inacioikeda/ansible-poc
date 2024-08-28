@@ -18,7 +18,6 @@
   ansible.builtin.file:
     path: /var/lib/pgsql/data
     state: absent
-    recurse: yes
 
 - name: Remove PostgreSQL configuration directory
   ansible.builtin.file:
