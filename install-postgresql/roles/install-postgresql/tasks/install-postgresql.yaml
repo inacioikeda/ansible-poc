@@ -14,6 +14,9 @@
     name: postgresql
     state: absent
 
+- name: Clean cache yum
+  ansible.builtin.shell: yum clean all
+
 - name: Install PostgreSQL server
   ansible.builtin.yum:
     name: postgresql{{ postgresql_version }}-server
