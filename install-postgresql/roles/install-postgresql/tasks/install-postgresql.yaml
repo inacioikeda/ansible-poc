@@ -29,38 +29,38 @@
 
 - name: Enable and start PostgreSQL service
   ansible.builtin.systemd:
-    name: postgresql-{{ postgresql_version }}
+    name: postgresql
     state: started
     enabled: yes
 
 - name: Configure PostgreSQL to listen on all interfaces
   ansible.builtin.lineinfile:
-    path: /var/lib/pgsql/{{ postgresql_version }}/data/postgresql.conf
+    path: /var/lib/pgsql/data/postgresql.conf
     regexp: '^#listen_addresses'
     line: "listen_addresses = '*'"
 
 - name: Configure pg_hba.conf to allow connections
   ansible.builtin.lineinfile:
-    path: /var/lib/pgsql/{{ postgresql_version }}/data/pg_hba.conf
+    path: /var/lib/pgsql/data/pg_hba.conf
     line: "host    all             all             0.0.0.0/0               md5"
     create: yes
 
 - name: Reload PostgreSQL configuration
   ansible.builtin.systemd:
-    name: postgresql-{{ postgresql_version }}
+    name: postgresql
     state: reloaded
 
 - name: Create PostgreSQL database
   ansible.builtin.shell: |
-    /usr/pgsql-{{ postgresql_version }}/bin/psql -U postgres -c "CREATE DATABASE {{ db_name }};"
+    /bin/psql -U postgres -c "CREATE DATABASE {{ db_name }};"
   become_user: postgres
 
 - name: Create PostgreSQL user
   ansible.builtin.shell: |
-    /usr/pgsql-{{ postgresql_version }}/bin/psql -U postgres -c "CREATE USER {{ db_user }} WITH PASSWORD '{{ db_password }}';"
+    /bin/psql -U postgres -c "CREATE USER {{ db_user }} WITH PASSWORD '{{ db_password }}';"
   become_user: postgres
 
 - name: Grant privileges to PostgreSQL user on the database
   ansible.builtin.shell: |
-    /usr/pgsql-{{ postgresql_version }}/bin/psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE {{ db_name }} TO {{ db_user }};"
+    /bin/psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE {{ db_name }} TO {{ db_user }};"
   become_user: postgres
