@@ -1,0 +1,7 @@
+- hosts: 192.168.1.236
+  gather_facts: False
+  remote_user: root
+  vars_files:
+    - vars_files/vars.yaml
+  roles:
+    - { role: remove-postgresql }

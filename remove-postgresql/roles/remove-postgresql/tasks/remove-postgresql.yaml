@@ -1,0 +1,49 @@
+---
+- name: Stop PostgreSQL service
+  ansible.builtin.systemd:
+    name: postgresql
+    state: stopped
+    enabled: no
+
+- name: Remove PostgreSQL packages
+  ansible.builtin.yum:
+    name: 
+      - postgresql-server
+      - postgresql
+      - postgresql-libs
+      - postgresql-contrib
+    state: absent
+
+- name: Remove PostgreSQL data directory
+  ansible.builtin.file:
+    path: /var/lib/pgsql/data
+    state: absent
+    recurse: yes
+
+- name: Remove PostgreSQL configuration directory
+  ansible.builtin.file:
+    path: /var/lib/pgsql/
+    state: absent
+    recurse: yes
+
+- name: Remove PostgreSQL logs directory
+  ansible.builtin.file:
+    path: /var/log/postgresql/
+    state: absent
+    recurse: yes
+
+- name: Remove PostgreSQL repository
+  ansible.builtin.yum:
+    name: pgdg-redhat-repo
+    state: absent
+
+- name: Remove PostgreSQL GPG key
+  ansible.builtin.rpm_key:
+    key: https://download.postgresql.org/pub/repos/yum/keys/PGDG-RPM-GPG-KEY-RHEL
+    state: absent
+
+- name: Remove PostgreSQL user
+  ansible.builtin.user:
+    name: postgres
+    state: absent
+    remove: yes
