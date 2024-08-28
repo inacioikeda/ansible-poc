@@ -24,13 +24,11 @@
   ansible.builtin.file:
     path: /var/lib/pgsql/
     state: absent
-    recurse: yes
 
 - name: Remove PostgreSQL logs directory
   ansible.builtin.file:
     path: /var/log/postgresql/
     state: absent
-    recurse: yes
 
 - name: Remove PostgreSQL repository
   ansible.builtin.yum:
