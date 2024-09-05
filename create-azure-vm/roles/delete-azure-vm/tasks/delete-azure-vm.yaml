@@ -1,0 +1,56 @@
+---
+- name: Verificar se o grupo de recursos existe
+  azure_rm_resource:
+    resource_group: myResourceGroup
+    state: present
+    resource_type: Microsoft.Resources/resourceGroups
+  register: resource_group_check
+
+- name: Remover a máquina virtual se existir
+  azure_rm_virtualmachine:
+    name: myUbuntuVM
+    resource_group: myResourceGroup
+    state: absent
+  when: resource_group_check.exists
+
+- name: Remover a interface de rede se existir
+  azure_rm_networkinterface:
+    name: myNIC
+    resource_group: myResourceGroup
+    state: absent
+  when: resource_group_check.exists
+
+- name: Remover o IP público se existir
+  azure_rm_publicipaddress:
+    name: myPublicIP
+    resource_group: myResourceGroup
+    state: absent
+  when: resource_group_check.exists
+
+- name: Remover a sub-rede se existir
+  azure_rm_subnet:
+    name: mySubnet
+    resource_group: myResourceGroup
+    virtual_network: myVnet
+    state: absent
+  when: resource_group_check.exists
+
+- name: Remover a rede virtual se existir
+  azure_rm_virtualnetwork:
+    name: myVnet
+    resource_group: myResourceGroup
+    state: absent
+  when: resource_group_check.exists
+
+- name: Remover o grupo de segurança de rede se existir
+  azure_rm_securitygroup:
+    name: myNetworkSecurityGroup
+    resource_group: myResourceGroup
+    state: absent
+  when: resource_group_check.exists
+
+- name: Remover o grupo de recursos se existir
+  azure_rm_resourcegroup:
+    name: myResourceGroup
+    state: absent
+  when: resource_group_check.exists

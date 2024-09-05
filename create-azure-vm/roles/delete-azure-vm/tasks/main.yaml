@@ -1,0 +1,2 @@
+- include_vars: ./vars_files/vars.yaml
+- import_tasks:  delete-azure-vm.yaml
