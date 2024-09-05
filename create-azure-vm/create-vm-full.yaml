@@ -14,7 +14,7 @@
         name: myResourceGroup
         location: East US
         state: present
-      when: resource_group_check.changed
+      when: resource_group_check|bool == false
 
     - name: Verificar se a rede virtual existe
       azure_rm_virtualnetwork_info:
@@ -31,12 +31,12 @@
         address_prefixes:
           - 192.168.1.0/24
         state: present
-      when: vnet_check.failed
+      when: vnet_check|bool == false
 
     - name: Verificar se a sub-rede existe
       azure_rm_subnet_info:
         resource_group: myResourceGroup
-        virtual_network: myVnet
+        virtual_network_name: myVnet
         name: mySubnet
       register: subnet_check
       ignore_errors: yes
@@ -45,10 +45,10 @@
       azure_rm_subnet:
         name: mySubnet
         resource_group: myResourceGroup
-        virtual_network: myVnet
+        virtual_network_name: myVnet
         address_prefix: 192.168.1.0/24
         state: present
-      when: subnet_check.failed
+      when: subnet_check|bool == false
 
     - name: Verificar se o IP público existe
       azure_rm_publicipaddress_info:
@@ -64,7 +64,7 @@
         location: East US
         allocation_method: Static
         state: present
-      when: public_ip_check.failed
+      when: public_ip_check|bool == false
 
     - name: Verificar se a interface de rede existe
       azure_rm_networkinterface_info:
@@ -76,16 +76,19 @@
     - name: Criar uma interface de rede com IP fixo se não existir
       azure_rm_networkinterface:
         name: myNIC
+        subnet_name: mySubnet
+        virtual_network: myVnet  
         resource_group: myResourceGroup
         location: East US
+        dns_servers:
+          - 8.8.8.8
         ip_configurations:
           - name: myIPConfig
-            subnet_name: mySubnet
             public_ip_address_name: myPublicIP
             private_ip_address: 192.168.1.100
-            private_ip_address_allocation: Static
+            private_ip_allocation_method: Static
         state: present
-      when: nic_check.failed
+      when: nic_check|bool == false
 
     - name: Verificar se a VM existe
       azure_rm_virtualmachine_info:
@@ -105,29 +108,19 @@
         network_interfaces:
           - myNIC
         image:
-          offer: UbuntuServer
+          offer: 0001-com-ubuntu-server-jammy
           publisher: Canonical
-          sku: 22.04-LTS
+          sku: 22_04-lts
           version: latest
-        storage_os_disk:
-          name: myOsDisk
-          caching: ReadWrite
-          create_option: FromImage
-          managed: true
-        storage_data_disks:
-          - name: myDataDisk
-            disk_size_gb: 10
-            create_option: Empty
-            managed: true
         state: present
-      when: vm_check.failed
+      when: vm_check|bool == false
 
     - name: Criar regra de segurança para permitir SSH, HTTP e HTTPS
       azure_rm_securitygroup:
         name: myNetworkSecurityGroup
         resource_group: myResourceGroup
         location: East US
-        security_rules:
+        rules:
           - name: AllowSSH
             protocol: Tcp
             direction: Inbound
@@ -157,59 +150,62 @@
         name: myNIC
         resource_group: myResourceGroup
         location: East US
-        network_security_group: myNetworkSecurityGroup
+        security_group: myNetworkSecurityGroup
+        subnet_name: mySubnet
+        virtual_network: myVnet
         state: present
       when: nsg.changed
 
-    - name: Exibir IP Público
-      debug:
-        msg: "A VM foi criada e o IP Público é {{ public_ip_check.public_ip_addresses[0].ip_address if public_ip_check.public_ip_addresses else 'Não disponível' }}"
-      when: public_ip_check is defined and public_ip_check.public_ip_addresses
-
-- name: Configurar e instalar Apache na VM Ubuntu
-  hosts: localhost
-  gather_facts: no
-  tasks:
-    - name: Aguardar a VM estar acessível
-      wait_for:
-        host: "{{ hostvars['localhost']['public_ip_check']['public_ip_addresses'][0]['ip_address'] }}"
-        port: 22
-        delay: 60
-        timeout: 300
-
-    - name: Configurar o acesso SSH à VM
-      ansible.builtin.set_fact:
-        ansible_host: "{{ hostvars['localhost']['public_ip_check']['public_ip_addresses'][0]['ip_address'] }}"
-        ansible_user: azureuser
-        ansible_password: MyP@ssw0rd1234
-
-    - name: Instalar Apache na VM Ubuntu
-      ansible.builtin.yum:
-        name: apache2
-        state: present
-      become: yes
-
-    - name: Iniciar e habilitar o serviço Apache
-      ansible.builtin.systemd:
-        name: apache2
-        state: started
-        enabled: yes
-      become: yes
-
-    - name: Configurar permissões do Apache
-      ansible.builtin.file:
-        path: /var/www/html/index.html
-        state: touch
-        mode: '0644'
-      become: yes
-
-    - name: Criar uma página de teste no Apache
-      ansible.builtin.copy:
-        content: |
-          <html>
-          <head><title>Apache Server</title></head>
-          <body><h1>Apache está funcionando!</h1></body>
-          </html>
-        dest: /var/www/html/index.html
-        mode: '0644'
-      become: yes
+#    - name: Exibir IP Público
+#      debug:
+#        msg: "A VM foi criada e o IP Público é {{ public_ip_check.public_ip_addresses[0].ip_address if public_ip_check.public_ip_addresses else 'Não disponível' }}"
+#      when: public_ip_check is defined and public_ip_check.public_ip_addresses
+#
+#- name: Configurar e instalar Apache na VM Ubuntu
+#  hosts: localhost
+#  gather_facts: no
+#  tasks:
+#    - name: Aguardar a VM estar acessível
+#      wait_for:
+#        host: "{{ public_ip_check.public_ip_address.ip_address }}"
+#        port: 22
+#        delay: 60
+#        timeout: 300
+#
+#    - name: Configurar o acesso SSH à VM
+#      ansible.builtin.set_fact:
+#        ansible_host: "{{ hostvars['localhost']['public_ip_check']['public_ip_addresses_name'][0]['ip_address'] }}"
+#        ansible_user: azureuser
+#        ansible_password: MyP@ssw0rd1234
+#
+#    - name: Instalar Apache na VM Ubuntu
+#      ansible.builtin.yum:
+#        name: apache2
+#        state: present
+#      become: yes
+#
+#    - name: Iniciar e habilitar o serviço Apache
+#      ansible.builtin.systemd:
+#        name: apache2
+#        state: started
+#        enabled: yes
+#      become: yes
+#
+#    - name: Configurar permissões do Apache
+#      ansible.builtin.file:
+#        path: /var/www/html/index.html
+#        state: touch
+#        mode: '0644'
+#      become: yes
+#
+#    - name: Criar uma página de teste no Apache
+#      ansible.builtin.copy:
+#        content: |
+#          <html>
+#          <head><title>Apache Server</title></head>
+#          <body><h1>Apache está funcionando!</h1></body>
+#          </html>
+#        dest: /var/www/html/index.html
+#        mode: '0644'
+#      become: yes
+#
