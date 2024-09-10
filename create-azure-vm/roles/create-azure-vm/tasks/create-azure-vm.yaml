@@ -4,6 +4,7 @@
     name: myResourceGroup
   register: resource_group_check
   ignore_errors: true
+  delegate_to: 192.168.1.223
 
 - name: Criar um grupo de recursos se não existir
   azure_rm_resourcegroup:
