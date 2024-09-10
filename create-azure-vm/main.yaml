@@ -1,8 +1,9 @@
 - hosts: localhost
   gather_facts: False
   remote_user: root
+  collections:
+    - azure.azcollection
   vars_files:
     - vars_files/vars.yaml
   roles:
     - { role: create-azure-vm }
-    - { role: delete-azure-vm }

@@ -1,3 +1,4 @@
+---
 - name: Verificar se o grupo de recursos existe
   azure_rm_resourcegroup_info:
     name: myResourceGroup
