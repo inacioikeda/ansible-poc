@@ -1,6 +1,6 @@
-- hosts: localhost
+- hosts: 192.168.1.223
   gather_facts: False
-  remote_user: root
+  remote_user: fabricads
   collections:
     - azure.azcollection
   vars_files:
